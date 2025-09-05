@@ -1,541 +1,2322 @@
-local rs = game:GetService("ReplicatedStorage")
-
--- Đợi CommF_ có sẵn
-repeat task.wait() until rs:FindFirstChild("Remotes") and rs.Remotes:FindFirstChild("CommF_")
-
--- Gửi lệnh đổi team sang Hải Quân
-rs.Remotes.CommF_:InvokeServer("SetTeam", "Marines")
-
--- ⏳ Đợi 5 giây
-task.wait(20)
-
--- 🌌✨ HNC Hub - Auto Kaitun Menu
--- By Kaitun
-
-local ts = game:GetService("TweenService")
-local plr = game.Players.LocalPlayer
-
--- Parent UI
-local function getParent()
-    local ok, ui = pcall(function() return gethui() end)
-    if ok and ui then return ui end
-    if game.CoreGui then return game.CoreGui end
-    return plr:WaitForChild("PlayerGui")
+if game.PlaceId ~= 126244816328678 then
+    return
 end
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "HNCHubMenu"
-gui.ResetOnSpawn = false
-gui.Parent = getParent()
+-- Load WindUI
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
--- ❓ Icon button
-local iconBtn = Instance.new("TextButton")
-iconBtn.Size = UDim2.new(0, 40, 0, 40)
-iconBtn.Position = UDim2.new(1, -50, 0, 20)
-iconBtn.AnchorPoint = Vector2.new(0, 0)
-iconBtn.Text = "❓"
-iconBtn.TextScaled = true
-iconBtn.Font = Enum.Font.GothamBold
-iconBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-iconBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-iconBtn.Parent = gui
+-- Ambil nama player
+local player = game.Players.LocalPlayer
+local playerName = player.Name
+local playerDisplayName = player.DisplayName
 
-local corner = Instance.new("UICorner", iconBtn)
-corner.CornerRadius = UDim.new(1, 0)
+-- Buat Window dengan nama player
+local Window = WindUI:CreateWindow({
+    Title = "Nexa [Premium Version]",
+    Author = "DIG Games Script | discord.gg/ECxQFc97F5",
+    Icon = "rbxassetid://107488593993096",
+    Folder = "Hanzo",
+    Size = UDim2.fromOffset(540, 420),
+    Transparent = true,
+    Theme = "Dark",
+    SideBarWidth = 180,
+    User = {
+        Enabled = true,
+        Anonymous = false,
+        Name = playerDisplayName,     -- Nama tampilan (bisa beda dari username)
+        UserName = "@" .. playerName  -- Username Roblox
+    }
+})
 
--- Menu Frame (ẩn mặc định)
-local menuFrame = Instance.new("Frame")
-menuFrame.Size = UDim2.new(0, 400, 0, 250)
-menuFrame.Position = UDim2.new(0.5, -200, 0.5, -125)
-menuFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-menuFrame.Visible = false
-menuFrame.ClipsDescendants = true
-menuFrame.Parent = gui
+WindUI:Notify({
+    Title = "Game Supported",
+    Content = "Dig, Poop, 99 Nights in the Forest, Grow A Garden",
+    Icon = "gamepad",
+    Duration = 6
+})
 
-local mcorner = Instance.new("UICorner", menuFrame)
-mcorner.CornerRadius = UDim.new(0, 20)
-
-local stroke = Instance.new("UIStroke", menuFrame)
-stroke.Thickness = 3
-stroke.Color = Color3.fromRGB(0, 200, 255)
-
--- Gradient background
-local grad = Instance.new("UIGradient", menuFrame)
-grad.Rotation = 45
-grad.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(72,61,139)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0,206,209)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(123,104,238))
-}
-
--- Title
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -20, 0, 40)
-title.Position = UDim2.new(0, 10, 0, 10)
-title.BackgroundTransparency = 1
-title.Text = "HNC Hub - Auto Kaitun"
-title.Font = Enum.Font.GothamBold
-title.TextScaled = true
-title.TextColor3 = Color3.fromRGB(255,255,255)
-title.Parent = menuFrame
-
--- ScrollingFrame cho list
-local scroll = Instance.new("ScrollingFrame")
-scroll.Size = UDim2.new(1, -20, 1, -60)
-scroll.Position = UDim2.new(0, 10, 0, 50)
-scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-scroll.ScrollBarThickness = 4
-scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-scroll.BackgroundTransparency = 1
-scroll.Parent = menuFrame
-
-local UIList = Instance.new("UIListLayout", scroll)
-UIList.Padding = UDim.new(0, 10)
-
--- Danh sách item
-local items = {
-    "Auto Superhuman",
-    "Auto Death Step",
-    "Auto Sharkman Karate",
-    "Auto Electric Claw",
-    "Auto Dragon Talon",
-    "Auto Saber",
-    "Auto Rengoku",
-    "Auto Canvander",
-    "Auto Buddy",
-    "Auto Tushita",
-    "Auto Yama",    
-    "Auto True Triple Katana",
-    "Auto Cursed Dual Katana",
-    "Auto Acidum Rifle",
-    "Auto Serpent Bow",
-    "Auto Kabucha",
-    "Auto Mastery Sword"
-}
-
-for _, text in ipairs(items) do
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, -10, 0, 40)
-    lbl.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
-    lbl.Text = text
-    lbl.Font = Enum.Font.Gotham
-    lbl.TextScaled = true
-    lbl.TextColor3 = Color3.fromRGB(255,255,255)
-    lbl.Parent = scroll
-
-    local lcorner = Instance.new("UICorner", lbl)
-    lcorner.CornerRadius = UDim.new(0, 10)
-end
-
--- Animation khi mở menu
-local function toggleMenu()
-    if menuFrame.Visible then
-        -- Đóng
-        ts:Create(menuFrame, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 400, 0, 0)
-        }):Play()
-        task.wait(0.4)
-        menuFrame.Visible = false
-    else
-        -- Mở
-        menuFrame.Visible = true
-        menuFrame.Size = UDim2.new(0, 400, 0, 0)
-        ts:Create(menuFrame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = UDim2.new(0, 400, 0, 250)
-        }):Play()
-    end
-end
-
-iconBtn.MouseButton1Click:Connect(toggleMenu)
-
--- 🌌❄️ HNC Hub Cosmic Snow Edition (Fixed)
--- By Kaitun
-
-local ts = game:GetService("TweenService")
-local plr = game.Players.LocalPlayer
-
--- Parent UI vào CoreGui
-local function getParent()
-    local ok, ui = pcall(function() return gethui() end)
-    if ok and ui then return ui end
-    if game.CoreGui then return game.CoreGui end
-    return plr:WaitForChild("PlayerGui")
-end
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HNCHubUI"
-ScreenGui.Parent = getParent()
-ScreenGui.ResetOnSpawn = false
-
--- Frame chính (cao hơn, mỏng, hiện đại)
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 480, 0, 90)
-Frame.Position = UDim2.new(0.5, -240, 0, 10) -- cao hơn
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
-Frame.BorderSizePixel = 0
-Frame.AnchorPoint = Vector2.new(0,0)
-Frame.Parent = ScreenGui
-Frame.ClipsDescendants = true
-
--- Bo góc
-local corner = Instance.new("UICorner", Frame)
-corner.CornerRadius = UDim.new(0, 25)
-
--- Viền ngoài phát sáng
-local stroke = Instance.new("UIStroke", Frame)
-stroke.Thickness = 3
-stroke.Transparency = 0.1
-
--- Gradient nền cosmic lung linh
-local gradient = Instance.new("UIGradient", Frame)
-gradient.Rotation = 45
-gradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(72,61,139)),
-    ColorSequenceKeypoint.new(0.25, Color3.fromRGB(0,206,209)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(123,104,238)),
-    ColorSequenceKeypoint.new(0.75, Color3.fromRGB(30,144,255)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,105,180))
-}
-
--- Hiệu ứng gradient đổi màu động
-task.spawn(function()
-    while task.wait(4) do
-        local newColors = {
-            Color3.fromRGB(math.random(80,255), math.random(80,255), math.random(80,255)),
-            Color3.fromRGB(math.random(80,255), math.random(80,255), math.random(80,255)),
-            Color3.fromRGB(math.random(80,255), math.random(80,255), math.random(80,255))
-        }
-        ts:Create(gradient, TweenInfo.new(4, Enum.EasingStyle.Linear), {
-            Color = ColorSequence.new{
-                ColorSequenceKeypoint.new(0, newColors[1]),
-                ColorSequenceKeypoint.new(0.5, newColors[2]),
-                ColorSequenceKeypoint.new(1, newColors[3])
-            }
-        }):Play()
-    end
+task.delay(6.5, function()
+    WindUI:Notify({
+        Title = "Bug Report",
+        Content = "If there are any errors, please let the developer know. Join Discord to report bugs.",
+        Icon = "cloud-alert",
+        Duration = 6
+    })
 end)
 
--- Viền rainbow
-local colors = {
-    Color3.fromRGB(138,43,226),
-    Color3.fromRGB(0,191,255),
-    Color3.fromRGB(75,0,130),
-    Color3.fromRGB(255,20,147),
-    Color3.fromRGB(0,255,255),
+task.delay(13, function()
+    WindUI:Notify({
+        Title = "Purchase",
+        Content = "If you want to buy this premium script key, join Discord to buy premium.",
+        Icon = "shopping-cart",
+        Duration = 6
+    })
+end)
+
+-- ✅ Tab dan UI
+local Tabs = {
+    Home = Window:Tab({ Title = "Home", Icon = "house"  }),
+    Active = Window:Tab({ Title = "Active", Icon = "info"  }),
+    Main = Window:Tab({ Title = "Dig", Icon = "shovel"  }),
+    Automatically = Window:Tab({ Title = "Automatically", Icon = "repeat-2"  }),
+    Shop = Window:Tab({ Title = "Shop", Icon = "store"  }),
+    Sell = Window:Tab({ Title = "Inventory", Icon = "shopping-cart"  }),
+    Setting = Window:Tab({ Title = "Misc/Player", Icon = "settings-2"  }),
+    Teleport = Window:Tab({ Title = "Teleport", Icon = "map-pin"  }),
 }
-task.spawn(function()
-    while task.wait(1.5) do
-        for _, c in ipairs(colors) do
-            ts:Create(stroke, TweenInfo.new(1.2, Enum.EasingStyle.Linear), {Color = c}):Play()
-            task.wait(1.2)
+
+Tabs.Home:Section({ Title = "Update" })
+
+Tabs.Home:Paragraph({
+    Title = "Here's what's new:",
+    Desc = [[
+No Update
+    ]]
+})
+
+Tabs.Home:Section({ Title = "Server" })
+
+Tabs.Home:Paragraph({ 
+    Title = "Join Our Discord!",
+    Desc = "Join the HDragons Discord server for the latest script updates and info!",
+    Image = "https://images-eds-ssl.xboxlive.com/image?url=4rt9.lXDC4H_93laV1_eHHFT949fUipzkiFOBH3fAiZZUCdYojwUyX2aTonS1aIwMrx6NUIsHfUHSLzjGJFxxsG72wAo9EWJR4yQWyJJaDaK1XdUso6cUMpI9hAdPUU_FNs11cY1X284vsHrnWtRw7oqRpN1m9YAg21d_aNKnIo-&format=source", -- Gambar kecil di kiri title (icon Discord)
+    ImageSize = 42, -- Ukuran icon kecil
+    Thumbnail = "https://i.imgur.com/NlmB2rq.jpeg", -- Gambar besar di bawah deskripsi
+    ThumbnailSize = 120 -- Ukuran tinggi thumbnail
+})
+
+Tabs.Home:Button({
+    Title = "Copy Discord Link",
+    Callback = function()
+        -- Save the config
+        myConfig:Save()
+
+        -- Copy the Discord link to clipboard
+        local discordLink = "https://discord.gg/ECxQFc97F5" -- replace with your link
+        if setclipboard then
+            setclipboard(discordLink)
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "Success!",
+                Text = "Discord link copied.",
+                Duration = 4
+            })
+        else
+            warn("setclipboard is not available in this executor.")
         end
     end
-end)
-
--- Tiêu đề chính
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -20, 0.6, 0)
-Title.Position = UDim2.new(0, 10, 0, 10)
-Title.BackgroundTransparency = 1
-Title.Text = "HNC Hub"
-Title.Font = Enum.Font.GothamBold
-Title.TextScaled = true
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextStrokeTransparency = 0.2
-Title.Parent = Frame
-
--- Chữ phụ
-local SubTitle = Instance.new("TextLabel")
-SubTitle.Size = UDim2.new(1, -20, 0.3, 0)
-SubTitle.Position = UDim2.new(0, 10, 0.65, 0)
-SubTitle.BackgroundTransparency = 1
-SubTitle.Text = "Kaitun"
-SubTitle.Font = Enum.Font.Gotham
-SubTitle.TextScaled = true
-SubTitle.TextColor3 = Color3.fromRGB(200, 230, 255)
-SubTitle.TextTransparency = 0.05
-SubTitle.Parent = Frame
-
--- ❄️ Hiệu ứng tuyết trắng rơi quanh menu
-local SnowFolder = Instance.new("Folder", ScreenGui)
-SnowFolder.Name = "Snow"
-
-local function createSnow()
-    local snow = Instance.new("Frame")
-    snow.Size = UDim2.new(0, math.random(3,6), 0, math.random(3,6))
-    snow.Position = UDim2.new(math.random(), 0, -0.1, 0)
-    snow.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    snow.BorderSizePixel = 0
-    local corner = Instance.new("UICorner", snow)
-    corner.CornerRadius = UDim.new(1,0)
-    snow.Parent = SnowFolder
-
-    ts:Create(snow, TweenInfo.new(math.random(6,10), Enum.EasingStyle.Linear), {
-        Position = UDim2.new(math.random(), 0, 1.2, 0),
-        BackgroundTransparency = 1
-    }):Play()
-
-    game:GetService("Debris"):AddItem(snow, 10)
-end
-
-task.spawn(function()
-    while task.wait(0.2) do
-        createSnow()
-    end
-end)
--- Đổi màu nhân vật
--- 🟢 HNC Hub - Full Green Aura Body
--- By Kaitun
+})
+Tabs.Active:Section({ Title = "Status" })
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Hàm tạo aura xanh phủ toàn thân
-local function applyGreenAura(char)
-    if not char then return end
-    
-    -- Xóa aura cũ nếu có
-    if char:FindFirstChild("GreenAura") then
-        char.GreenAura:Destroy()
+-- Daftar boss yang ingin dipantau
+local watchedBosses = {
+    ["King Crab"] = true,
+    ["Fuzzball"] = true,
+    ["Candlelight Phantom"] = true,
+    ["Giant Spider"] = true,
+    ["Basilisk"] = true,
+    ["Molten Monstrosity"] = true,
+    ["Void Worm"] = true
+}
+
+-- Paragraf status Boss
+local ActiveParagrap = Tabs.Active:Paragraph({
+    Title = "Status Boss",
+    Desc = "❌Boss Not Spawns"
+})
+
+-- Paragraf status Mysterious Flower
+local FlowerStatus = Tabs.Active:Paragraph({
+    Title = "Status Mysterious Flower",
+    Desc = "❌ Mysterious Flower Not Spawns"
+})
+
+-- Paragraf status Moteor
+local ActiveStatus = Tabs.Active:Paragraph({
+    Title = "Status Moteor",
+    Desc = "❌ Moteor Not Spawns"
+})
+
+-- Fungsi deteksi banyak boss aktif
+local function GetAllActiveBosses()
+    local found = {}
+    local spawns = workspace:FindFirstChild("Spawns")
+    local bossSpawns = spawns and spawns:FindFirstChild("BossSpawns")
+    if not bossSpawns then return found end
+
+    for _, boss in ipairs(bossSpawns:GetChildren()) do
+        if watchedBosses[boss.Name] then
+            for _, node in ipairs(boss:GetChildren()) do
+                if (node:IsA("Part") or node:IsA("Model")) and node:FindFirstChild("BossRangeCircle") then
+                    table.insert(found, boss.Name)
+                    break -- cukup 1 node aktif untuk dianggap boss itu spawn
+                end
+            end
+        end
     end
-
-    -- Highlight toàn cơ thể
-    local aura = Instance.new("Highlight")
-    aura.Name = "GreenAura"
-    aura.FillColor = Color3.fromRGB(0, 255, 0)   -- xanh lá
-    aura.OutlineColor = Color3.fromRGB(0, 255, 0)
-    aura.FillTransparency = 0.3                  -- trong mờ nhìn xuyên
-    aura.OutlineTransparency = 0                 -- viền sáng rõ
-    aura.Parent = char
+    return found
 end
 
--- Áp ngay lập tức khi đang sống
-if LocalPlayer.Character then
-    applyGreenAura(LocalPlayer.Character)
-end
+-- Loop update status ke UI
+task.spawn(function()
+    while true do
+        -- Boss
+        local activeBosses = GetAllActiveBosses()
+        if #activeBosses > 0 then
+            ActiveParagrap:SetDesc("- " .. table.concat(activeBosses, " | "))
+        else
+            ActiveParagrap:SetDesc("❌Boss Not Spawns")
+        end
 
--- Tự áp lại khi respawn
-LocalPlayer.CharacterAdded:Connect(function(char)
-    char:WaitForChild("HumanoidRootPart")
-    task.wait(1)
-    applyGreenAura(char)
+        -- Mysterious Flower
+        local world = workspace:FindFirstChild("World")
+        local interactive = world and world:FindFirstChild("Interactive")
+        local flower = interactive and interactive:FindFirstChild("Mysterious Flower")
+
+        if flower and flower:IsA("Model") then
+            FlowerStatus:SetDesc("- Mysterious Flower Spawns")
+        else
+            FlowerStatus:SetDesc("❌ Mysterious Flower Not Spawns")
+        end
+
+        -- Moteor
+        local spawns = workspace:FindFirstChild("Spawns")
+        local moteorNodes = spawns and spawns:FindFirstChild("MoteorNodes")
+        local isMoteorSpawned = false
+
+        if moteorNodes then
+            for _, child in ipairs(moteorNodes:GetChildren()) do
+                if child:IsA("Part") then
+                    isMoteorSpawned = true
+                    break
+                end
+            end
+        end
+
+        if isMoteorSpawned then
+            ActiveStatus:SetDesc("- Moteor Spawns")
+        else
+            ActiveStatus:SetDesc("❌ Moteor Not Spawns")
+        end
+
+        task.wait(1)
+    end
 end)
-_G.FastAttack = true
 
-if _G.FastAttack then
-    local _ENV = (getgenv or getrenv or getfenv)()
+Tabs.Active:Section({ Title = "Boss" })
 
-    local function SafeWaitForChild(parent, childName)
-        local success, result = pcall(function()
-            return parent:WaitForChild(childName)
-        end)
-        if not success or not result then
-            warn("noooooo: " .. childName)
-        end
-        return result
-    end
-
-    local function WaitChilds(path, ...)
-        local last = path
-        for _, child in {...} do
-            last = last:FindFirstChild(child) or SafeWaitForChild(last, child)
-            if not last then break end
-        end
-        return last
-    end
-
-    local VirtualInputManager = game:GetService("VirtualInputManager")
-    local CollectionService = game:GetService("CollectionService")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local TeleportService = game:GetService("TeleportService")
-    local RunService = game:GetService("RunService")
-    local Players = game:GetService("Players")
-    local Player = Players.LocalPlayer
-
-    if not Player then
-        warn("Không tìm thấy người chơi cục bộ.")
-        return
-    end
-
-    local Remotes = SafeWaitForChild(ReplicatedStorage, "Remotes")
-    if not Remotes then return end
-
-    local Validator = SafeWaitForChild(Remotes, "Validator")
-    local CommF = SafeWaitForChild(Remotes, "CommF_")
-    local CommE = SafeWaitForChild(Remotes, "CommE")
-
-    local ChestModels = SafeWaitForChild(workspace, "ChestModels")
-    local WorldOrigin = SafeWaitForChild(workspace, "_WorldOrigin")
-    local Characters = SafeWaitForChild(workspace, "Characters")
-    local Enemies = SafeWaitForChild(workspace, "Enemies")
-    local Map = SafeWaitForChild(workspace, "Map")
-
-    local EnemySpawns = SafeWaitForChild(WorldOrigin, "EnemySpawns")
-    local Locations = SafeWaitForChild(WorldOrigin, "Locations")
-
-    local RenderStepped = RunService.RenderStepped
-    local Heartbeat = RunService.Heartbeat
-    local Stepped = RunService.Stepped
-
-    local Modules = SafeWaitForChild(ReplicatedStorage, "Modules")
-    local Net = SafeWaitForChild(Modules, "Net")
-
-    local sethiddenproperty = sethiddenproperty or function(...) return ... end
-    local setupvalue = setupvalue or (debug and debug.setupvalue)
-    local getupvalue = getupvalue or (debug and debug.getupvalue)
-
-    local Settings = {
-        AutoClick = true,
-        ClickDelay = 0.0000000000000000000001
-    }
-
-    local Module = {}
-
-    Module.FastAttack = (function()
-        if _ENV.rz_FastAttack then
-            return _ENV.rz_FastAttack
-        end
-
-        local FastAttack = {
-            Distance = 1000,
-            attackMobs = true,
-            attackPlayers = true,
-            Equipped = nil
-        }
-
-        local RegisterAttack = SafeWaitForChild(Net, "RE/RegisterAttack")
-        local RegisterHit = SafeWaitForChild(Net, "RE/RegisterHit")
-
-        local function IsAlive(character)
-        return character and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0
-        end
-
-        local function ProcessEnemies(OthersEnemies, Folder)
-            local BasePart = nil
-            for _, Enemy in Folder:GetChildren() do
-                local Head = Enemy:FindFirstChild("Head")
-                if Head and IsAlive(Enemy) and Player:DistanceFromCharacter(Head.Position) < FastAttack.Distance then
-                    if Enemy ~= Player.Character then
-                        table.insert(OthersEnemies, { Enemy, Head })
-                        BasePart = Head
-                    end
-                end
-            end
-            return BasePart
-        end
-
-        function FastAttack:Attack(BasePart, OthersEnemies)
-            if not BasePart or #OthersEnemies == 0 then return end
-            RegisterAttack:FireServer(Settings.ClickDelay or 0)
-            RegisterHit:FireServer(BasePart, OthersEnemies)
-        end
-
-        function FastAttack:AttackNearest()
-            local OthersEnemies = {}
-            local Part1 = ProcessEnemies(OthersEnemies, Enemies)
-            local Part2 = ProcessEnemies(OthersEnemies, Characters)
-            if #OthersEnemies > 0 then
-                self:Attack(Part1 or Part2, OthersEnemies)
-            else
-                task.wait(0)
-            end
-        end
-
-        function FastAttack:BladeHits()
-            local Equipped = IsAlive(Player.Character) and Player.Character:FindFirstChildOfClass("Tool")
-            if Equipped and Equipped.ToolTip ~= "Gun" then
-                self:AttackNearest()
-            else
-                task.wait(0)
-            end
-        end
-
-        task.spawn(function()
-            while task.wait(Settings.ClickDelay) do
-                if Settings.AutoClick then
-                    FastAttack:BladeHits()
-                end
-            end
-        end)
-
-        _ENV.rz_FastAttack = FastAttack
-        return FastAttack
-    end)()
-end
 local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
-local player = Players.LocalPlayer
+local selectedBosses = {}
+local originalPosition = nil
+local NoclipConnection
 
--- Tùy chỉnh
-local TEXT = "HNC Hub"
-local TEXT_SIZE = 18                 -- kích thước chữ (không quá to)
-local GUI_OFFSET = Vector3.new(0, 1.8, 0) -- khoảng cách so với đầu
-local RAINBOW_SPEED = 1.0           -- tốc độ đổi màu (1 = bình thường, tăng để nhanh hơn)
-
-local function createBillboardFor(character)
-    if not character then return end
-    local head = character:FindFirstChild("Head") or character:FindFirstChildWhichIsA("BasePart")
-    if not head then return end
-
-    -- Nếu đã có Billboard do script tạo thì hủy trước
-    local existing = head:FindFirstChild("HNC_FastAttack_Label")
-    if existing then existing:Destroy() end
-
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "HNC_FastAttack_Label"
-    billboard.Adornee = head
-    billboard.AlwaysOnTop = true
-    billboard.Size = UDim2.new(0, 200, 0, 40) -- kích thước GUI
-    billboard.StudsOffset = GUI_OFFSET
-    billboard.Parent = head
-
-    local textLabel = Instance.new("TextLabel")
-    textLabel.Name = "Label"
-    textLabel.Size = UDim2.new(1, 0, 1, 0)
-    textLabel.BackgroundTransparency = 1
-    textLabel.Text = TEXT
-    textLabel.Font = Enum.Font.SourceSansBold
-    textLabel.TextSize = TEXT_SIZE
-    textLabel.TextStrokeTransparency = 0.6
-    textLabel.TextTransparency = 0
-    textLabel.TextScaled = false
-    textLabel.Parent = billboard
-
-    -- rainbow loop
-    local hue = 0
-    local con
-    con = RunService.RenderStepped:Connect(function(dt)
-        hue = (hue + dt * RAINBOW_SPEED) % 1
-        local rgb = Color3.fromHSV(hue, 0.9, 1)
-        if textLabel and textLabel.Parent then
-            textLabel.TextColor3 = rgb
-        else
-            if con then con:Disconnect() end
+-- Noclip Aktif
+local function EnableNoclip()
+    if NoclipConnection then NoclipConnection:Disconnect() end
+    NoclipConnection = RunService.Stepped:Connect(function()
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+            LocalPlayer.Character.Humanoid:ChangeState(11)
         end
     end)
 end
 
--- khi spawn/respawn character
-local function onCharacterAdded(character)
-    -- đợi head xuất hiện
-    if not character.Parent then
-        character.AncestryChanged:Wait()
+-- Noclip Nonaktif
+local function DisableNoclip()
+    if NoclipConnection then
+        NoclipConnection:Disconnect()
+        NoclipConnection = nil
     end
-    -- tạo sau 0.1s để head chắc chắn có
-    wait(0.1)
-    createBillboardFor(character)
 end
 
--- kết nối
-if player.Character then
-    onCharacterAdded(player.Character)
+-- Freeze karakter
+local function FreezeCharacter()
+    local char = LocalPlayer.Character
+    if char then
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 0
+            humanoid.JumpPower = 0
+        end
+    end
 end
-player.CharacterAdded:Connect(onCharacterAdded)
 
--- optional: nếu muốn tắt khi rời game (cleanup)
-player.AncestryChanged:Connect(function(_, parent)
-    if not parent then
-        -- client đang bị remove, nothing to do
+-- Unfreeze karakter
+local function UnfreezeCharacter()
+    local char = LocalPlayer.Character
+    if char then
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = 16
+            humanoid.JumpPower = 50
+        end
+    end
+end
+
+-- Dropdown Boss
+Tabs.Active:Dropdown({
+    Title = "Select Bosses to Teleport",
+    Values = {
+        "King Crab",
+        "Fuzzball",
+        "Candlelight Phantom",
+        "Giant Spider",
+        "Basilisk",
+        "Molten Monstrosity",
+        "Void Worm"
+    },
+    Value = {},
+    Multi = true,
+    AllowNone = true,
+    Callback = function(options)
+        selectedBosses = options
+    end
+})
+
+-- Toggle Auto Teleport
+Tabs.Active:Toggle({
+    Title = "Auto Teleport to Boss",
+    Desc = "Teleport under Boss + Freeze + Return",
+    Callback = function(state)
+        getgenv().AutoTPBoss = state
+
+        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if state then
+            if hrp then
+                originalPosition = hrp.CFrame
+            end
+        else
+            DisableNoclip()
+            UnfreezeCharacter()
+
+            -- Kembali ke posisi awal saat toggle dimatikan
+            if originalPosition and hrp then
+                hrp.CFrame = originalPosition
+            end
+        end
+
+        -- Loop pengecekan boss
+        task.spawn(function()
+            while AutoTPBoss do
+                for _, bossName in ipairs(selectedBosses) do
+                    local spawns = workspace:FindFirstChild("Spawns")
+                    local bossSpawns = spawns and spawns:FindFirstChild("BossSpawns")
+                    local bossFolder = bossSpawns and bossSpawns:FindFirstChild(bossName)
+
+                    if bossFolder then
+                        for _, node in ipairs(bossFolder:GetChildren()) do
+                            if node:IsA("Part") and node:FindFirstChild("BossRangeCircle") then
+                                local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                if hrp then
+                                    hrp.CFrame = CFrame.new(node.Position + Vector3.new(0, 5, 0))
+                                    EnableNoclip()
+                                    FreezeCharacter()
+                                end
+
+                                -- Tunggu boss mati
+                                repeat task.wait(1) until not node:FindFirstChild("BossRangeCircle") or not AutoTPBoss
+
+                                -- Balik ke posisi awal
+                                if AutoTPBoss and originalPosition and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                                    LocalPlayer.Character.HumanoidRootPart.CFrame = originalPosition
+                                end
+
+                                DisableNoclip()
+                                UnfreezeCharacter()
+                                break
+                            end
+                        end
+                    end
+                end
+                task.wait(1)
+            end
+        end)
+    end
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local DigBossRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Dig_Boss_OnHit")
+
+local autoAttackBoss = false
+
+task.spawn(function()
+    while true do
+        if autoAttackBoss then
+            pcall(function()
+                DigBossRemote:FireServer(true)
+            end)
+        end
+        task.wait(0.2) -- Delay antar serangan
+    end
+end)
+
+Tabs.Active:Toggle({
+    Title = "Auto Attack Boss",
+    Desc = "Automatically attacks the boss",
+    Default = false,
+    Callback = function(state)
+        autoAttackBoss = state
+    end
+})
+
+
+Tabs.Main:Section({ Title = "Auto Dig" })
+
+-- 📦 Roblox Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local LocalPlayer = Players.LocalPlayer
+local Backpack = LocalPlayer:WaitForChild("Backpack")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local Holes = Workspace:WaitForChild("World"):WaitForChild("Zones"):WaitForChild("_NoDig")
+
+-- 🔁 Shared State
+local ENABLED = false
+local digCount = 0
+local connections = {}
+local eventSetupDone = false
+
+-- 🔧 Ambil Tool
+local function getTool()
+    return LocalPlayer.Character and LocalPlayer.Character:FindFirstChildWhichIsA("Tool")
+end
+
+-- ❌ Hancurkan Hitbox
+local function destroyHitbox()
+    local hitbox = Holes:FindFirstChild(LocalPlayer.Name .. "_Crater_Hitbox") or
+                   workspace:FindFirstChild(LocalPlayer.Name .. "_Crater_Hitbox", true)
+    if hitbox then
+        pcall(function() hitbox:Destroy() end)
+    end
+end
+
+-- 🪓 Aktifkan Shovel
+local function activateTool()
+    local tool = getTool()
+    if tool and tool:IsDescendantOf(LocalPlayer.Character) then
+        pcall(destroyHitbox)
+        pcall(function() tool:Activate() end)
+    end
+end
+
+-- ❎ Bersihkan Event
+local function cleanupEvents()
+    for _, conn in ipairs(connections) do
+        conn:Disconnect()
+    end
+    connections = {}
+    eventSetupDone = false
+end
+
+-- 🔁 Setup Event
+local function setupEvents()
+    if eventSetupDone then return end
+    eventSetupDone = true
+
+    table.insert(connections, LocalPlayer.PlayerGui.ChildAdded:Connect(function(child)
+        if not ENABLED then return end
+        if child.Name == "Dig" then
+            task.delay(1, function()
+                if not ENABLED then return end
+                local tool = getTool()
+                if tool then
+                    destroyHitbox()
+                    Remotes:WaitForChild("Dig_Finished"):FireServer(0, {
+                        {
+                            Orientation = Vector3.zero,
+                            Transparency = 1,
+                            Name = "PositionPart",
+                            Position = Vector3.new(-6099.755, 113.090, -1961.920),
+                            Color = Color3.new(0.639, 0.635, 0.647),
+                            Material = Enum.Material.Plastic,
+                            Shape = Enum.PartType.Block,
+                            Size = Vector3.new(0.1, 0.1, 0.1)
+                        },
+                        {
+                            Orientation = Vector3.new(-23, 45, 0),
+                            Transparency = 0,
+                            Name = "Rock/1",
+                            Position = Vector3.new(-6098.369, 112.713, -1960.535),
+                            Color = Color3.new(0.765, 0.655, 0.525),
+                            Material = Enum.Material.Sand,
+                            Shape = Enum.PartType.Block,
+                            Size = Vector3.new(2.986, 2.135, 1.817)
+                        }
+                    })
+
+                    -- 🔄 Refresh Shovel: Unequip → Equip Ulang
+                    task.delay(0.1, function()
+                        tool.Parent = Backpack
+                        task.wait(0.1)
+                        Remotes:WaitForChild("Backpack_Equip"):FireServer(tool)
+                    end)
+                end
+            end)
+
+            local strong_bar = child.Safezone.Holder:FindFirstChild("Area_Strong")
+            local player_bar = child.Safezone.Holder:FindFirstChild("PlayerBar")
+            if strong_bar and player_bar then
+                table.insert(connections, player_bar:GetPropertyChangedSignal("Position"):Connect(function()
+                    if ENABLED then
+                        player_bar.Position = strong_bar.Position
+                        digCount += 1
+                        activateTool()
+                    end
+                end))
+            end
+        end
+    end))
+
+    table.insert(connections, LocalPlayer:GetAttributeChangedSignal("IsDigging"):Connect(function()
+        if ENABLED and not LocalPlayer:GetAttribute("IsDigging") then
+            activateTool()
+        end
+    end))
+
+    table.insert(connections, LocalPlayer.CharacterAdded:Connect(function(char)
+        table.insert(connections, char.ChildAdded:Connect(function(v)
+            if ENABLED and v:IsA("Tool") and v.Name:lower():find("shovel") then
+                task.wait(0.1)
+                activateTool()
+            end
+        end))
+    end))
+
+    if LocalPlayer.Character then
+        table.insert(connections, LocalPlayer.Character.ChildAdded:Connect(function(v)
+            if ENABLED and v:IsA("Tool") and v.Name:lower():find("shovel") then
+                task.wait(0.1)
+                activateTool()
+            end
+        end))
+    end
+
+    table.insert(connections, RunService.Heartbeat:Connect(function()
+        if ENABLED and digCount >= 0.5 then
+            activateTool()
+        end
+    end))
+end
+
+-- 🔘 Toggle WindUI
+Tabs.Main:Toggle({ 
+    Title = "Auto Dig (Instant)",
+    Desc = "⚠️If you want to use this feature, you must activate the equip shovel. this will cause a crash",
+    Callback = function(v)
+        print("Toggle Changed: " .. tostring(v))
+        ENABLED = v
+        cleanupEvents()
+        if v then
+            setupEvents()
+        end
+    end
+})
+
+
+
+
+-- 📦 Roblox Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+local LocalPlayer = Players.LocalPlayer
+local Backpack = LocalPlayer:WaitForChild("Backpack")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local Holes = Workspace:WaitForChild("World"):WaitForChild("Zones"):WaitForChild("_NoDig")
+
+-- 🔁 Shared State
+local ENABLED = false
+local digCount = 0
+local connections = {}
+
+-- 🔧 Get tool
+local function getTool()
+    return LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
+end
+
+-- ❌ Destroy hitbox
+local function destroyHitbox()
+    local hitbox = Holes:FindFirstChild(LocalPlayer.Name .. "_Crater_Hitbox")
+    if hitbox then hitbox:Destroy() end
+end
+
+-- 🪓 Activate shovel tool
+local function activateTool()
+    local tool = getTool()
+    if tool then
+        destroyHitbox()
+        tool:Activate()
+    end
+end
+
+-- 🔁 Setup Auto Dig Events
+local function setupEvents()
+    table.insert(connections, LocalPlayer.PlayerGui.ChildAdded:Connect(function(v)
+        if v.Name == "Dig" then
+            local strong_bar = v.Safezone.Holder:FindFirstChild("Area_Strong")
+            local player_bar = v.Safezone.Holder:FindFirstChild("PlayerBar")
+            if strong_bar and player_bar then
+                table.insert(connections, player_bar:GetPropertyChangedSignal("Position"):Connect(function()
+                    if ENABLED then
+                        player_bar.Position = strong_bar.Position
+                        digCount += 1
+                        activateTool()
+                    end
+                end))
+            end
+        end
+    end))
+
+    table.insert(connections, LocalPlayer:GetAttributeChangedSignal("IsDigging"):Connect(function()
+        if ENABLED and not LocalPlayer:GetAttribute("IsDigging") then
+            activateTool()
+        end
+    end))
+
+    table.insert(connections, LocalPlayer.CharacterAdded:Connect(function(char)
+        char.ChildAdded:Connect(function(v)
+            if ENABLED and v:IsA("Tool") and v.Name:lower():find("shovel") then
+                task.wait(0.1)
+                activateTool()
+            end
+        end)
+    end))
+
+    if LocalPlayer.Character then
+        table.insert(connections, LocalPlayer.Character.ChildAdded:Connect(function(v)
+            if ENABLED and v:IsA("Tool") and v.Name:lower():find("shovel") then
+                task.wait(0.1)
+                activateTool()
+            end
+        end))
+    end
+
+    -- HAPUS bagian karakter berputar di RunService
+    table.insert(connections, RunService.Heartbeat:Connect(function()
+        if ENABLED and digCount >= 3 then
+            activateTool()
+        end
+    end))
+end
+
+-- 🔌 Cleanup connections
+local function cleanupEvents()
+    for _, conn in ipairs(connections) do
+        conn:Disconnect()
+    end
+    connections = {}
+end
+
+-- 🧠 Auto Dig (Fast)
+Tabs.Main:Toggle({
+    Title = "Auto Dig (Fast)",
+    Desc = "Automatically performs a digging minigame quickly",
+    Value = false,
+    Callback = function(Value)
+        ENABLED = Value
+        if Value then
+            digCount = 0
+            setupEvents()
+        else
+            cleanupEvents()
+        end
+    end
+})
+
+-- 🧩 Services
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+
+-- 🧩 Variables
+local local_player = Players.LocalPlayer
+local holes = Workspace:WaitForChild("World"):WaitForChild("Zones"):WaitForChild("_NoDig")
+
+-- 🌍 Global toggle
+getgenv().enabled = false
+
+-- 🧰 Get tool
+local function get_tool()
+    return local_player.Character and local_player.Character:FindFirstChildOfClass("Tool")
+end
+
+-- 🧱 Destroy hitbox & activate
+local function destroy_hitbox_and_activate()
+    local hitbox = holes:FindFirstChild(local_player.Name .. "_Crater_Hitbox")
+    if hitbox then hitbox:Destroy() end
+    local tool = get_tool()
+    if tool then tool:Activate() end
+end
+
+-- 🧠 Listener: saat tool ditambahkan ke karakter
+local_player.Character.ChildAdded:Connect(function(v)
+    if getgenv().enabled and v:IsA("Tool") and v.Name:lower():find("shovel") then
+        task.wait(1)
+        destroy_hitbox_and_activate()
+    end
+end)
+
+-- 🧠 Listener: saat GUI "Dig" muncul
+local_player.PlayerGui.ChildAdded:Connect(function(v)
+    if getgenv().enabled and v.Name == "Dig" then
+        local safezone = v:FindFirstChild("Safezone")
+        if not safezone then return end
+
+        local holder = safezone:FindFirstChild("Holder")
+        local strong_bar = holder and holder:FindFirstChild("Area_Strong")
+        local player_bar = holder and holder:FindFirstChild("PlayerBar")
+        if not (strong_bar and player_bar) then return end
+
+        player_bar:GetPropertyChangedSignal("Position"):Connect(function()
+            if not getgenv().enabled then return end
+            if math.abs(player_bar.Position.X.Scale - strong_bar.Position.X.Scale) <= 0.04 then
+                local tool = get_tool()
+                if tool then
+                    tool:Activate()
+                    task.wait()
+                end
+            end
+        end)
+    end
+end)
+
+-- 🧠 Listener: IsDigging attribute
+local_player:GetAttributeChangedSignal("IsDigging"):Connect(function()
+    if not getgenv().enabled then return end
+    if not local_player:GetAttribute("IsDigging") then
+        destroy_hitbox_and_activate()
+    end
+end)
+
+-- ✅ Toggle UI (WindUI Style)
+Tabs.Main:Toggle({
+    Title = "Auto Dig (Slow)",
+    Desc = "Automatically performs a slow digging minigame",
+    Value = false,
+    Callback = function(Value)
+        getgenv().enabled = Value
+    end
+})
+
+Tabs.Main:Section({ Title = "Dig Setting" })
+
+-- 🛠️ Shovel Names
+local shovelNames = {
+    "Wooden Shovel", "Bejeweled Shovel", "Training Shovel", "Toy Shovel",
+    "Copper Shovel", "Rock Shovel", "Lucky Shovel", "Ruby Shovel",
+    "Abyssal Shovel", "Bell Shovel", "Magnet Shovel", "Jam Shovel",
+    "Candlelight Shovel", "Spore Spade", "Slayers Shovel", "Arachnid Shovel",
+    "Shortcake Shovel", "Nature Shovel", "Pizza Roller", "Rock Splitter",
+    "Butterfly Shovel", "Archaic Shovel", "Frigid Shovel", "Venomous Shovel",
+    "Gold Digger", "Flowery Shovel", "Obsidian Shovel", "Prismatic Shovel",
+    "Fortuned Shovel", "Beast Slayer", "Solstice Shovel", "Glinted Shovel",
+    "Draconic Shovel", "Monstrous Shovel", "Starfire Shovel", "Crescent Shovel",
+    "Supernova Shovel", "Symphony Shovel", "Voidcrest Shovel", "Black Hole Shovel"
+}
+
+-- 🔗 Referensi Services
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local Backpack = LocalPlayer:WaitForChild("Backpack")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+-- 🧰 Equip shovel dari Backpack
+local function equipAnyShovel()
+    for _, tool in ipairs(Backpack:GetChildren()) do
+        if tool:IsA("Tool") then
+            for _, name in ipairs(shovelNames) do
+                if tool.Name == name then
+                    Remotes:WaitForChild("Backpack_Equip"):FireServer(tool)
+                    return
+                end
+            end
+        end
+    end
+end
+
+-- ❌ Unequip shovel (pindahkan dari tangan ke Backpack)
+local function unequipShovel()
+    local character = LocalPlayer.Character
+    if not character then return end
+
+    for _, tool in ipairs(character:GetChildren()) do
+        if tool:IsA("Tool") then
+            for _, name in ipairs(shovelNames) do
+                if tool.Name == name then
+                    tool.Parent = Backpack
+                    print("Unequipped shovel:", tool.Name)
+                    return
+                end
+            end
+        end
+    end
+end
+
+-- ♻️ Auto Equip Toggle WindUI
+local backpackConn
+Tabs.Main:Toggle({
+    Title = "Auto Equip Shovel",
+    Value = false,
+    Desc = "Automatically equips any shovel from your backpack if available",
+    Callback = function(state)
+        ENABLED = state
+
+        if ENABLED then
+            equipAnyShovel()
+
+            backpackConn = Backpack.ChildAdded:Connect(function(child)
+                if ENABLED then
+                    task.wait(0.1)
+                    equipAnyShovel()
+                end
+            end)
+
+            WindUI:Notify({
+                Title = "Auto Equip",
+                Content = "✅ Auto Equip Shovel Enabled",
+                Duration = 0
+            })
+        else
+            unequipShovel()
+
+            if backpackConn then
+                backpackConn:Disconnect()
+                backpackConn = nil
+            end
+
+            WindUI:Notify({
+                Title = "Auto Equip",
+                Content = "❌ Auto Equip Shovel Disabled",
+                Duration = 0
+            })
+        end
+    end
+})
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local spinning = false
+local spinSpeed = 5
+local spinConnection
+
+-- Fungsi update karakter
+local function updateCharacter()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        return LocalPlayer.Character.HumanoidRootPart
+    end
+    return nil
+end
+
+-- Toggle untuk Spin
+Tabs.Main:Toggle({
+    Title = "Spin Character",
+    Desc = "Toggle to spin your character in place",
+    Default = false,
+    Callback = function(state)
+        spinning = state
+
+        if spinConnection then
+            spinConnection:Disconnect()
+            spinConnection = nil
+        end
+
+        if spinning then
+            spinConnection = RunService.RenderStepped:Connect(function()
+                local root = updateCharacter()
+                if root then
+                    root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(spinSpeed), 0)
+                end
+            end)
+        end
+    end
+})
+
+-- Slider Spin Speed (Max 500)
+Tabs.Main:Slider({
+    Title = "Spin Speed",
+    Desc = "Adjust how fast your character spins",
+    Value = {
+        Min = 1,
+        Max = 500,
+        Default = 5,
+    },
+    Callback = function(v)
+        spinSpeed = v
+    end
+})
+
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- 🌐 Global State
+local areaRadius = 30
+local boxYOffset = 3
+
+-- 🔁 Auto Walk State
+local autoWalkConnection = nil
+local autoWalkEnabled = false
+
+-- 🔁 Auto Dig State
+local autoDigConnection = nil
+local autoDigEnabled = false
+
+-- 📦 Create Shared Box (used by both features)
+local areaBox = Instance.new("Part")
+areaBox.Name = "AutoAreaBox"
+areaBox.Anchored = true
+areaBox.CanCollide = false
+areaBox.Size = Vector3.new(areaRadius, 1, areaRadius)
+areaBox.Material = Enum.Material.Neon
+areaBox.Transparency = 1
+areaBox.Parent = Workspace
+
+-- 🧠 Cek apakah posisi karakter di dalam box
+local function isInBox(position, box)
+	local size = box.Size / 2
+	local min = box.Position - size
+	local max = box.Position + size
+	return (
+		position.X >= min.X and position.X <= max.X and
+		position.Z >= min.Z and position.Z <= max.Z
+	)
+end
+
+-- 🔁 Dapatkan posisi acak di dalam box
+local function getRandomPositionInBox()
+	local center = areaBox.Position
+	local half = areaBox.Size.X / 2 - 2
+	local x = math.random(-half, half)
+	local z = math.random(-half, half)
+	return Vector3.new(center.X + x, center.Y + 3, center.Z + z)
+end
+
+-- 🚶 Gerakkan karakter ke posisi
+local function moveTo(position)
+	local char = LocalPlayer.Character
+	if char and char:FindFirstChild("Humanoid") then
+		char.Humanoid:MoveTo(position)
+	end
+end
+
+-- 🔁 Auto Walk Loop (fixed version)
+local function startAutoWalk()
+	if autoWalkConnection then return end
+
+	local nextMoveTime = 0
+	autoWalkConnection = RunService.Heartbeat:Connect(function(dt)
+		local char = LocalPlayer.Character
+		if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
+
+		local hrp = char.HumanoidRootPart
+		local humanoid = char.Humanoid
+
+		areaBox.Transparency = 0.2
+
+		if isInBox(hrp.Position, areaBox) then
+			nextMoveTime -= dt
+			if nextMoveTime <= 0 then
+				moveTo(getRandomPositionInBox())
+				nextMoveTime = 1 + math.random() -- 1–2 detik jeda
+			end
+		else
+			humanoid:Move(Vector3.zero)
+		end
+	end)
+end
+
+local function stopAutoWalk()
+	if autoWalkConnection then
+		autoWalkConnection:Disconnect()
+		autoWalkConnection = nil
+	end
+	if not autoDigEnabled then
+		areaBox.Transparency = 1
+	end
+end
+
+-- 🔁 Auto Dig Loop (dummy logic)
+local function startAutoDig()
+	if autoDigConnection then return end
+	autoDigConnection = RunService.Heartbeat:Connect(function()
+		-- Ganti bagian ini dengan logika auto dig kamu
+	end)
+end
+
+local function stopAutoDig()
+	if autoDigConnection then
+		autoDigConnection:Disconnect()
+		autoDigConnection = nil
+	end
+	if not autoWalkEnabled then
+		areaBox.Transparency = 1
+	end
+end
+
+-- 🎛️ Toggle: Auto Walk
+Tabs.Main:Toggle({
+	Title = "Auto Walk Box",
+	Desc = "Character will walk randomly inside the static box",
+	Default = false,
+	Callback = function(state)
+		autoWalkEnabled = state
+		if state then
+			local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+			-- Set posisi awal box 1x (tidak mengikuti player)
+			areaBox.Position = char:WaitForChild("HumanoidRootPart").Position - Vector3.new(0, boxYOffset, 0)
+			startAutoWalk()
+		else
+			stopAutoWalk()
+		end
+	end
+})
+
+-- 🎛️ Toggle: Auto Dig
+Tabs.Main:Toggle({
+	Title = "Auto Dig Box",
+	Desc = "Show the box and activate auto dig",
+	Default = false,
+	Callback = function(state)
+		autoDigEnabled = state
+		areaBox.Transparency = state or autoWalkEnabled and 0.2 or 1
+
+		if state then
+			local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+			if areaBox.Position.Magnitude == 0 then
+				areaBox.Position = char:WaitForChild("HumanoidRootPart").Position - Vector3.new(0, boxYOffset, 0)
+			end
+			startAutoDig()
+		else
+			stopAutoDig()
+		end
+	end
+})
+
+-- 🎚️ Slider: Adjust Box Radius
+Tabs.Main:Slider({
+	Title = "Dig/Walk Radius",
+	Desc = "Adjust the radius of the auto-dig/walk box",
+	Value = {
+		Min = 10,
+		Max = 100,
+		Default = 30,
+	},
+	Callback = function(v)
+		areaRadius = v
+		if areaBox then
+			areaBox.Size = Vector3.new(areaRadius, 1, areaRadius)
+		end
+	end
+})
+
+Tabs.Automatically:Section({ Title = "Drill" })
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+
+-- List nama Drill yang tersedia
+local DrillList = {
+    "Old Drill",
+    "Basic Drill",
+    "Metal Drill",
+    "Gold Drill",
+    "Titanium Drill",
+    "Diamond Drill",
+    "Cobalt Drill",
+    "Quantum Drill",
+    "Celestial Drill",
+    "Ancient Relic Drill"
+}
+
+-- Variabel global
+local SelectedDrill = DrillList[1]
+
+-- Dropdown WindUI
+Tabs.Automatically:Dropdown({
+    Title = "Select Drill",
+    Desc = "Choose the drill to use",
+    Values = DrillList,
+    Multi = false,
+    Default = DrillList[1],
+    Callback = function(value)
+        SelectedDrill = value
+        print("🔧 Selected Drill:", SelectedDrill)
+    end
+})
+
+-- Fungsi beli drill
+local function BuyDrill(drillName)
+    local char = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+    local HRP = char:WaitForChild("HumanoidRootPart")
+    local StartPos = HRP.CFrame
+
+    local found = false
+    for _, model in ipairs(Workspace:GetDescendants()) do
+        if model:IsA("Model") and model.Name:lower():match("^" .. drillName:lower() .. "$") then
+            local prompt = model:FindFirstChildWhichIsA("ProximityPrompt", true)
+            if prompt then
+                found = true
+                -- Teleport ke drill
+                local pos = model:GetPivot().Position
+                HRP.CFrame = CFrame.new(pos + Vector3.new(0, 3, 0))
+                task.wait(0.1)
+                fireproximityprompt(prompt)
+                task.wait(0.2)
+                -- Balik ke posisi awal
+                HRP.CFrame = StartPos
+                print("✅ Drill dibeli:", drillName)
+                break
+            end
+        end
+    end
+    if not found then
+        warn("❌ Drill tidak ditemukan:", drillName)
+    end
+end
+
+-- Tombol beli drill
+Tabs.Automatically:Button({
+    Title = "Buy Selected Drill",
+    Desc = "Teleport dan beli drill terpilih",
+    Callback = function()
+        if typeof(SelectedDrill) == "string" and SelectedDrill ~= "" then
+            BuyDrill(SelectedDrill)
+        else
+            warn("⚠️ Belum ada drill yang dipilih.")
+        end
+    end
+})
+
+-- Toggle Auto Place Drill
+Tabs.Automatically:Toggle({
+    Title = "Auto Place Drill",
+    Desc = "Tempatkan drill otomatis berdasarkan pilihan",
+    Default = false,
+    Callback = function(state)
+        getgenv().AutoPlaceDrill = state
+        if state then
+            task.spawn(function()
+                while getgenv().AutoPlaceDrill do
+                    pcall(function()
+                        if typeof(SelectedDrill) == "string" and SelectedDrill ~= "" then
+                            ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Drill_AttemptPlace"):FireServer(SelectedDrill)
+                            print("✅ Drill placed:", SelectedDrill)
+                        end
+                    end)
+                    task.wait(3)
+                end
+            end)
+        end
+    end
+})
+
+Tabs.Automatically:Section({ Title = "Spawn Cars" })
+
+-- Ini mechanic
+-- 🟦 Service & Remote
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local workspace = game:GetService("Workspace")
+
+local VehicleSpawn = ReplicatedStorage:WaitForChild("Remotes"):FindFirstChild("Vehicle_Spawn")
+local AvaRoot = workspace:WaitForChild("World"):WaitForChild("NPCs"):WaitForChild("Ava Carter"):WaitForChild("HumanoidRootPart")
+
+-- 🟦 Daftar nama mobil
+local vehicleList = {
+    "ATV", "Golf Cart", "Koi Truck", "Commander", "Silver",
+    "Pulse", "Rumbler", "Tracer", "DMW M3", "Elite 6x6",
+    "Forklift", "The Ox", "Roadster RS", "Tornado", "McBruce 700", "Monster Silver"
+}
+
+-- 🟦 Variabel pilihan mobil
+local selectedVehicle = vehicleList[1] -- default pilihan pertama
+
+-- 🟦 Dropdown untuk pilih mobil
+Tabs.Automatically:Dropdown({
+    Title = "Select Cars",
+    Values = vehicleList,
+    Multi = false,
+    Default = selectedVehicle,
+    Callback = function(v)
+        selectedVehicle = v
+    end
+})
+
+-- 🟦 Button untuk spawn
+Tabs.Automatically:Button({
+    Title = "Spawn Cars",
+    Callback = function()
+        if VehicleSpawn then
+            VehicleSpawn:FireServer(selectedVehicle, AvaRoot, {})
+            WindUI:Notify({
+                Title = "Spawn Vehicle",
+                Content = "✅ Spawned: " .. selectedVehicle,
+                Duration = 0
+            })
+        else
+            WindUI:Notify({
+                Title = "Error",
+                Content = "Error dev Fix",
+                Duration = 3
+            })
+        end
+    end
+})
+
+Tabs.Automatically:Section({ Title = "Equipment" })
+
+local player = game.Players.LocalPlayer
+local playerName = player.Name
+
+local replicatedStorage = game:GetService("ReplicatedStorage")
+local remotes = replicatedStorage:WaitForChild("Remotes")
+
+-- Function to equip magnet by name
+local function equipMagnet(magnetName)
+    local magnet = replicatedStorage:WaitForChild("PlayerStats")
+        :WaitForChild(playerName)
+        :WaitForChild("Inventory")
+        :WaitForChild("Magnets")
+        :FindFirstChild(magnetName)
+
+    if magnet then
+        remotes:WaitForChild("Magnet_Equip"):FireServer(magnet)
+    end
+end
+
+-- List of available magnets
+local magnetList = {
+    "Prismatic Magnet",
+    "Crimsonsteel Magnet",
+    "Magic Magnet",
+    "Golden Horseshoe",
+    "Legendary Magnet",
+    "Fossil Brush",
+    "Fortuned Magnet",
+    "Brass Magnet",
+    "Ghost Magnet",
+    "Odd Mushroom",
+    "Green Magnet",
+    "Light Bulb",
+    "Red Magnet",
+    "Basic Magnet"
+}
+
+local selectedMagnet = magnetList[1] -- default magnet
+
+-- ✅ WindUI-style Dropdown
+Tabs.Automatically:Dropdown({
+    Title = "Select Magnet",
+    Values = magnetList,
+    Multi = false,
+    Default = 1,
+    Callback = function(value)
+        selectedMagnet = value
+    end
+})
+
+-- ✅ WindUI-style Button
+Tabs.Automatically:Button({
+    Title = "Equip Selected Magnet",
+    Callback = function()
+        equipMagnet(selectedMagnet)
+    end
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local charmRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Equip_Charm")
+local inventory = ReplicatedStorage:WaitForChild("PlayerStats")[Players.LocalPlayer.Name]:WaitForChild("Inventory"):WaitForChild("Charms")
+
+local selectedCharm = nil
+
+local charmList = {
+    "Construction Headphones",
+    "Lantern",
+    "LED Headlamp",
+    "Training Gloves",
+    "Blue Coil",
+    "Dice Glasses",
+    "Lucky Bell",
+    "Pearl Necklace",
+    "Pebble Pet",
+    "Regen Coil",
+    "Shoulder Bag",
+    "Archer Hat",
+    "Banjo",
+    "Blue Mushroom Cap",
+    "Controller Gloves",
+    "Farmer’s Hat",
+    "Fortuned Bell",
+    "Ghostly Lantern",
+    "Haste Coil",
+    "Hiker’s Bag",
+    "Jar Of Jam",
+    "Jar Of Peanut Butter",
+    "Large Log",
+    "Magnet On A Stick",
+    "Ninja Headband",
+    "Rock Pounder",
+    "Solstice Bell",
+    "Spiky Barrel",
+    "Strong Lantern",
+    "Umbrella Hat",
+    "Vat Of Dye",
+    "Sea Apparatus",
+    "Dynamite Stash",
+    "Canary Apparatus",
+    "Fruit Hat",
+    "Golden Heart",
+    "Heart Monitor",
+    "Ice Pick",
+    "Imp Horns",
+    "Lifting Belt",
+    "Magic Top Hat",
+    "Super Blue Coil",
+    "Super Regen Coil",
+    "Sydney’s Violin",
+    "Tenacity Brace",
+    "Vision Goggles",
+    "War Shield",
+    "Cauldron Hat",
+    "Ecosystem Sleeve",
+    "Flower Crown",
+    "Momentum Bands",
+    "Blazing Gauntlet",
+    "Blood Crown",
+    "Copper Cowboy Hat",
+    "Magma Boots",
+    "Rabbit’s Paw",
+    "Prismatic Domino Crown",
+    "Fuzzball’s Feet",
+    "Radioactive Horn"
+}
+
+-- WindUI Dropdown
+Tabs.Automatically:Dropdown({
+    Title = "Select Charm",
+    Values = charmList,
+    Multi = false,
+    Callback = function(value)
+        selectedCharm = value
+    end
+})
+
+-- Equip Button
+Tabs.Automatically:Button({
+    Title = "Equip Selected Charm",
+    Callback = function()
+        if selectedCharm then
+            for _, item in pairs(inventory:GetChildren()) do
+                if item:IsA("Folder") and item:FindFirstChild("Name") and item.Name == selectedCharm then
+                    charmRemote:FireServer(item)
+                    print("✅ Equipped Charm:", item.Name)
+                    return
+                end
+            end
+            warn("⚠️ Charm not found in inventory:", selectedCharm)
+        else
+            warn("⚠️ No charm selected")
+        end
+    end
+})
+
+Tabs.Automatically:Section({ Title = "Zone" })
+
+-- 🌍 Zone Names
+local zoneNames = {
+    "Fox Town",
+    "Fernhill Forest",
+    "Combat Guild",
+    "Verdant Vale",
+    "Cinder Shores",
+    "Rooftop Woodlands",
+    "Tom's Bakery",
+    "Cinder Cavern",
+    "Mount Cinder",
+    "Penguins Pizza",
+    "Copper Mesa",
+    "Salty's Saloon",
+    "Alona Jungle",
+    "Mount Charcoal",
+    "The Ocean"
+}
+
+-- 🛰️ WindUI Button to Unlock All Zones
+Tabs.Automatically:Button({
+    Title = "Unlock All Zones",
+    Callback = function()
+        local Remotes = game:GetService("ReplicatedStorage"):WaitForChild("Remotes")
+        local zonesFolder = workspace:WaitForChild("World"):WaitForChild("Zones"):WaitForChild("_Ambience")
+
+        for _, name in ipairs(zoneNames) do
+            local zone = zonesFolder:FindFirstChild(name)
+            if zone then
+                Remotes:WaitForChild("Change_Zone"):FireServer(zone)
+                task.wait(0.1) -- Delay to avoid server flooding
+            end
+        end
+
+        WindUI:Notify({
+            Title = "Zones",
+            Content = "✅ All zones unlocked successfully.",
+            Duration = 0
+        })
+    end
+})
+
+-- Ini Shop
+Tabs.Shop:Section({ Title = "Shovel" })
+
+-- 📦 Services
+local player = game.Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+
+-- 📦 Noclip handler
+local noclipConn
+local function setNoclip(state)
+    if state then
+        if noclipConn then noclipConn:Disconnect() end
+        noclipConn = RunService.Stepped:Connect(function()
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                player.Character.Humanoid:ChangeState(11)
+            end
+        end)
+    else
+        if noclipConn then
+            noclipConn:Disconnect()
+            noclipConn = nil
+        end
+    end
+end
+
+-- 📦 Teleport function with noclip to shovel in Workspace
+local function tpToShovel(shovelName)
+    local shovelModel = Workspace:FindFirstChild("World")
+        and Workspace.World:FindFirstChild("Interactive")
+        and Workspace.World.Interactive:FindFirstChild("Purchaseable")
+        and Workspace.World.Interactive.Purchaseable:FindFirstChild(shovelName)
+
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if shovelModel and hrp then
+        setNoclip(true)
+        hrp.CFrame = shovelModel:GetPivot()
+        WindUI:Notify({
+            Title = "Teleport",
+            Content = "✅ Teleported to: " .. shovelName,
+            Duration = 0
+        })
+        task.delay(0.5, function()
+            setNoclip(false)
+        end)
+    else
+        WindUI:Notify({
+            Title = "Teleport Error",
+            Content = "❌ Shovel not found: " .. shovelName,
+            Duration = 2
+        })
+    end
+end
+
+-- 📦 Shovel list
+local shovelNames = {
+    "Wooden Shovel", "Bejeweled Shovel", "Training Shovel", "Toy Shovel",
+    "Copper Shovel", "Rock Shovel", "Lucky Shovel", "Ruby Shovel",
+    "Abyssal Shovel", "Bell Shovel", "Magnet Shovel", "Jam Shovel",
+    "Candlelight Shovel", "Spore Spade", "Slayers Shovel", "Arachnid Shovel",
+    "Shortcake Shovel", "Nature Shovel", "Pizza Roller", "Rock Splitter",
+    "Butterfly Shovel", "Archaic Shovel", "Frigid Shovel", "Venomous Shovel",
+    "Gold Digger", "Flowery Shovel", "Obsidian Shovel", "Prismatic Shovel",
+    "Fortuned Shovel", "Beast Slayer", "Solstice Shovel", "Glinted Shovel",
+    "Draconic Shovel", "Monstrous Shovel", "Starfire Shovel", "Crescent Shovel",
+    "Supernova Shovel", "Symphony Shovel", "Voidcrest Shovel", "Black Hole Shovel"
+}
+
+-- 📦 Store selected name
+local selectedShovel = shovelNames[1]
+
+-- 🧭 Dropdown menu
+Tabs.Shop:Dropdown({
+    Title = "Select Shovel Location",
+    Values = shovelNames,
+    Multi = false,
+    Default = 1,
+    Callback = function(selected)
+        selectedShovel = selected
+    end
+})
+
+-- 🔘 Teleport Button
+Tabs.Shop:Button({
+    Title = "Teleport Now",
+    Callback = function()
+        if selectedShovel then
+            tpToShovel(selectedShovel)
+        else
+            WindUI:Notify({
+                Title = "Teleport Error",
+                Content = "❌ No shovel selected!",
+                Duration = 1
+            })
+        end
+    end
+})
+
+Tabs.Shop:Section({ Title = "Traveling Merchant" })
+
+Tabs.Shop:Button({
+    Title = "Teleport to Traveling Merchant",
+    Callback = function()
+        local player = game:GetService("Players").LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+        local merchant = workspace:FindFirstChild("World")
+        if merchant then merchant = merchant:FindFirstChild("NPCs") end
+        if merchant then merchant = merchant:FindFirstChild("Merchant Cart") end
+        if merchant then merchant = merchant:FindFirstChild("Traveling Merchant") end
+
+        if merchant and merchant:FindFirstChild("HumanoidRootPart") then
+            humanoidRootPart.CFrame = merchant.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+            WindUI:Notify({
+                Title = "Teleported!",
+                Content = "✅ Successfully teleported to the Traveling Merchant.",
+                Duration = 0
+            })
+        else
+            WindUI:Notify({
+                Title = "Teleport Failed",
+                Content = "❌ Traveling Merchant not found.",
+                Duration = 3
+            })
+        end
+    end
+})
+
+Tabs.Shop:Section({ Title = "Horn" })
+
+-- 📍 Horn Locations
+local hornLocations = {
+    ["Seafarer's Horn"] = CFrame.new(68.0905304, 0.275776088, -14.8855305, 0, 0, 1, 0, 1, 0, -1, 0, 0),
+    ["Phantom Horn"] = CFrame.new(63.8733063, 0.67037493, -16.2581711, 0, 0, 1, 0, 1, 0, -1, 0, 0),
+    ["Toxic Horn"] = CFrame.new(828.703125, 0.432434082, -534.119873, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+    ["Webs Horn"] = CFrame.new(66.8483658, 0.362187207, -11.714365, 1, 0, 0, 0, 1, 0, 0, 0, 1),
+    ["Horizon Horn"] = CFrame.new(75.9630127, 0.275817871, 29.999649, 0, 0, 1, 0, 1, 0, -1, 0, 0),
+    ["Tempest Horn"] = CFrame.new(6.65496349, 0.720375538, 7.37846661, 0, 0, 1, 0, 1, 0, -1, 0, 0),
+    ["Stormcaller Horn"] = CFrame.new(44.6320534, 0.275776207, 88.8912964, 0, 0, 1, 0, 1, 0, -1, 0, 0),
+    ["Blue Moon Horn"] = CFrame.new(104.247208, 0.439552307, -9.76256752, -1, 0, 0, 0, 1, 0, 0, 0, -1),
+    ["Radiant Horn"] = CFrame.new(94.5219727, 0.682427883, -24.8038673, -1, 0, 0, 0, 1, 0, 0, 0, -1)
+}
+
+-- 🔘 Selected Horn (default)
+local selectedHorn = "Seafarer's Horn"
+
+-- 🔽 Dropdown WindUI
+Tabs.Shop:Dropdown({
+    Title = "Horn Location",
+    Values = {
+        "Seafarer's Horn",
+        "Phantom Horn",
+        "Toxic Horn",
+        "Webs Horn",
+        "Horizon Horn",
+        "Tempest Horn",
+        "Stormcaller Horn",
+        "Blue Moon Horn",
+        "Radiant Horn"
+    },
+    Value = selectedHorn,
+    Multi = false,
+    AllowNone = false,
+    Callback = function(option)
+        selectedHorn = option
+    end
+})
+
+-- 🚀 Button teleport
+Tabs.Shop:Button({
+    Title = "Teleport to Horn",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        if char and char:FindFirstChild("HumanoidRootPart") and hornLocations[selectedHorn] then
+            char.HumanoidRootPart.CFrame = hornLocations[selectedHorn]
+        end
+    end
+})
+
+
+Tabs.Sell:Section({ Title = "Inventory" })
+
+Tabs.Sell:Button({ 
+    Title = "Sell Held Item", 
+    Desc = "Sell the tool you are currently holding",
+    Callback = function()
+        local player = game:GetService("Players").LocalPlayer
+        local heldTool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+
+        if heldTool then
+            local rocky = workspace:WaitForChild("World"):WaitForChild("NPCs"):WaitForChild("Rocky")
+            local remote = game:GetService("ReplicatedStorage"):WaitForChild("DialogueRemotes"):WaitForChild("SellHeldItem")
+            remote:FireServer(heldTool, rocky)
+        end
+    end
+})
+
+-- 📦 Services
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local workspace = game:GetService("Workspace")
+
+-- 📦 Rocky NPC & Remote
+local Rocky = workspace:WaitForChild("World"):WaitForChild("NPCs"):WaitForChild("Rocky")
+local SellAllItems = ReplicatedStorage:WaitForChild("DialogueRemotes"):WaitForChild("SellAllItems")
+
+-- 🌍 Global Variables
+getgenv().autoSell = false
+getgenv().sellDelay = 3
+
+-- ✅ UI Elements
+Tabs.Sell:Toggle({
+    Title = "Auto Sell",
+    Desc = "Automatically sells items to Rocky",
+    Value = false,
+    Callback = function(value)
+        getgenv().autoSell = value
+    end
+})
+
+Tabs.Sell:Slider({
+    Title = "Auto Sell Delay (seconds)",
+    Desc = "Delay between each sell",
+    Value = {
+        Min = 1,
+        Max = 60,
+        Default = 3,
+    },
+    Suffix = "s",
+    Callback = function(value)
+        getgenv().sellDelay = value
+    end
+})
+
+-- 🔁 Looping Auto Sell
+task.spawn(function()
+    while task.wait(1) do
+        if getgenv().autoSell then
+            SellAllItems:FireServer(Rocky)
+            task.wait(getgenv().sellDelay)
+        end
+    end
+end)
+
+
+
+Tabs.Setting:Section({ Title = "Misc" })
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- 🔒 List of Staff UserIds
+local staffIds = {
+    12345678,
+    98765432,
+}
+
+-- 🌐 Global Flags
+getgenv().StaffDetectionEnabled = false
+getgenv().StaffActions = { "Notify" } -- default: Notify
+
+-- ✅ Check if player is staff
+local function isStaff(player)
+    for _, id in ipairs(staffIds) do
+        if player.UserId == id then
+            return true
+        end
+    end
+    return false
+end
+
+-- ⚠️ Handle detected staff
+local function handleStaff(player)
+    if not getgenv().StaffDetectionEnabled then return end
+    if not isStaff(player) then return end
+
+    for _, action in ipairs(getgenv().StaffActions) do
+        if action == "Kick" then
+            LocalPlayer:Kick("Staff detected: " .. player.Name)
+        elseif action == "Notify" then
+            UI:Notify({
+                Title = "⚠️ Staff Detected",
+                Content = player.Name .. " (UserId: " .. player.UserId .. ") joined!",
+                Duration = 6.5
+            })
+        end
+    end
+end
+
+-- 🔁 Detect staff on join
+Players.PlayerAdded:Connect(function(player)
+    handleStaff(player)
+end)
+
+-- 🔘 Main Toggle
+Tabs.Setting:Toggle({
+    Title = "Anti Staff",
+    Value = true,
+    Callback = function(state)
+        getgenv().StaffDetectionEnabled = state
+        print("Anti Staff Enabled: " .. tostring(state))
+
+        -- Scan current players if enabled
+        if state then
+            for _, player in ipairs(Players:GetPlayers()) do
+                handleStaff(player)
+            end
+        end
+    end
+})
+
+-- 🔽 Multi-Select Dropdown for Actions
+Tabs.Setting:Dropdown({
+    Title = "Staff Actions",
+    Desc = "Choose actions to execute when staff is detected",
+    Values = { "Kick", "Notify" },
+    Value = { "Notify" },
+    Multi = true,
+    AllowNone = false,
+    Callback = function(option)
+        getgenv().StaffActions = option
+        print("Selected staff actions: " .. game:GetService("HttpService"):JSONEncode(option))
+    end
+})
+
+local Players = game:GetService("Players")
+local VirtualUser = game:GetService("VirtualUser")
+
+local antiAFKConnection = nil
+
+-- Function to enable or disable Anti-AFK
+local function setAntiAFK(state)
+    if state then
+        if not antiAFKConnection then
+            antiAFKConnection = Players.LocalPlayer.Idled:Connect(function()
+                VirtualUser:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+                task.wait(1)
+                VirtualUser:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+                print("✅ Anti-AFK triggered")
+            end)
+        end
+    else
+        if antiAFKConnection then
+            antiAFKConnection:Disconnect()
+            antiAFKConnection = nil
+            print("❌ Anti-AFK disabled")
+        end
+    end
+end
+
+-- WindUI Toggle
+Tabs.Setting:Toggle({
+    Title = "Anti AFK",
+    Value = true,
+    Callback = setAntiAFK
+})
+
+-- 📦 HUD TIME + FPS (Auto panjang, kecil + RGB)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "HUD"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local TextLabel = Instance.new("TextLabel")
+TextLabel.Name = "InfoBar"
+TextLabel.Parent = ScreenGui
+TextLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+TextLabel.BackgroundTransparency = 0.3
+TextLabel.Position = UDim2.new(0, 0, 0, 36)
+TextLabel.Size = UDim2.new(0, 0, 0, 16)
+TextLabel.Font = Enum.Font.Code
+TextLabel.TextColor3 = Color3.new(1,1,1)
+TextLabel.TextSize = 12
+TextLabel.TextXAlignment = Enum.TextXAlignment.Left
+TextLabel.AutomaticSize = Enum.AutomaticSize.X
+TextLabel.Text = "TIME : 00:00:00 | FPS: 60"
+
+-- ⏱ Timer + FPS
+local startTime = tick()
+local runService = game:GetService("RunService")
+local hudEnabled = true
+
+-- 🌈 RGB helper function
+local function getRainbowColor(speed)
+    local t = tick() * speed
+    return Color3.fromHSV(t % 1, 1, 1)
+end
+
+-- 🔁 Update loop
+runService.RenderStepped:Connect(function()
+    if not hudEnabled then
+        TextLabel.Visible = false
+        return
+    end
+
+    TextLabel.Visible = true
+    local elapsed = math.floor(tick() - startTime)
+    local h = string.format("%02d", math.floor(elapsed / 3600))
+    local m = string.format("%02d", math.floor((elapsed % 3600) / 60))
+    local s = string.format("%02d", elapsed % 60)
+    local fps = math.floor(1 / runService.RenderStepped:Wait())
+
+    TextLabel.Text = string.format("TIME : %s:%s:%s | FPS: %d", h, m, s, fps)
+    TextLabel.TextColor3 = getRainbowColor(0.5) -- semakin besar, makin cepat rainbow
+end)
+
+-- 🟢 Toggle WindUI
+Tabs.Setting:Toggle({
+    Title = "Show Time + FPS",
+    Value = true,
+    Callback = function(state)
+        hudEnabled = state
+    end
+})
+
+Tabs.Setting:Section({ Title = "Server" })
+
+-- 📦 Services
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+
+-- 👤 Pemain lokal
+local LocalPlayer = Players.LocalPlayer
+
+-- 🔘 Tombol WindUI untuk Rejoin
+Tabs.Setting:Button({
+    Title = "Rejoin Server",
+    Callback = function()
+        local placeId = game.PlaceId
+        local jobId = game.JobId
+        TeleportService:TeleportToPlaceInstance(placeId, jobId, LocalPlayer)
+    end
+})
+
+-- 📦 Roblox Services
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+
+local LocalPlayer = Players.LocalPlayer
+
+-- 🌐 Server Hop dengan WindUI
+Tabs.Setting:Button({
+    Title = "Server Hop",
+    Callback = function()
+        local success, response = pcall(function()
+            local url = ("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100"):format(game.PlaceId)
+            return game:HttpGet(url)
+        end)
+
+        if not success then
+            warn("Gagal ambil data server.")
+            return
+        end
+
+        local servers = HttpService:JSONDecode(response)
+        for _, server in ipairs(servers.data) do
+            if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+                return
+            end
+        end
+
+        warn("Tidak ada server lain yang tersedia.")
+    end
+})
+
+Tabs.Setting:Button({
+    Title = "Copy Job ID",
+    Desc = "Copy the server JobId to the clipboard",
+    Callback = function()
+        setclipboard(game.JobId)
+    end
+})
+
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlaceId = game.PlaceId
+
+local targetJobId = ""
+
+Tabs.Setting:Input({
+    Title = "Enter Job ID",
+    PlaceholderText = "Enter the JobId here...",
+    Default = "",
+    Callback = function(text)
+        targetJobId = text
+    end
+})
+
+Tabs.Setting:Button({
+    Title = "Teleport to Job ID",
+    Desc = "Teleport to the server using the provided JobId",
+    Callback = function()
+        if targetJobId ~= "" then
+            TeleportService:TeleportToPlaceInstance(PlaceId, targetJobId, LocalPlayer)
+        end
+    end
+})
+
+Tabs.Setting:Section({ Title = "Player" })
+
+-- 📦 Service
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+
+-- 🧠 State
+local walkSpeedEnabled = false
+local walkSpeedValue = 50 -- default awal
+local defaultSpeed = 16
+
+-- 🎚️ Slider WindUI Format
+Tabs.Setting:Slider({
+    Title = "set running speed",
+    Value = {
+        Min = 16,
+        Max = 500,
+        Default = 50,
+    },
+    Callback = function(v)
+        walkSpeedValue = v
+        if walkSpeedEnabled then
+            pcall(function()
+                Humanoid.WalkSpeed = walkSpeedValue
+            end)
+        end
+    end
+})
+
+-- 🔘 Toggle WindUI
+Tabs.Setting:Toggle({
+    Title = "WalkSpeed Boost",
+    Default = false,
+    Callback = function(state)
+        walkSpeedEnabled = state
+        if state then
+            pcall(function()
+                Humanoid.WalkSpeed = walkSpeedValue
+            end)
+        else
+            pcall(function()
+                Humanoid.WalkSpeed = defaultSpeed
+            end)
+        end
+    end
+})
+
+-- 🔁 Reset saat respawn
+LocalPlayer.CharacterAdded:Connect(function(char)
+    Character = char
+    Humanoid = char:WaitForChild("Humanoid")
+    if walkSpeedEnabled then
+        Humanoid.WalkSpeed = walkSpeedValue
+    else
+        Humanoid.WalkSpeed = defaultSpeed
+    end
+end)
+
+Tabs.Teleport:Section({ Title = "Teleport ???" })
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Tombol Teleport ke Moteor
+Tabs.Teleport:Button({
+    Title = "Teleport to Moteor",
+    Callback = function()
+        local spawns = workspace:FindFirstChild("Spawns")
+        local moteorFolder = spawns and spawns:FindFirstChild("MoteorNodes")
+        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+
+        if moteorFolder and hrp then
+            for _, obj in ipairs(moteorFolder:GetChildren()) do
+                if obj:IsA("Part") then
+                    hrp.CFrame = CFrame.new(obj.Position + Vector3.new(0, 5, 0)) -- Teleport di atas Moteor
+                    break
+                end
+            end
+        end
+    end
+})
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Mysterious Flower",
+    Callback = function()
+        local flowerPath = workspace:FindFirstChild("World")
+            and workspace.World:FindFirstChild("Interactive")
+            and workspace.World.Interactive:FindFirstChild("Mysterious Flower")
+
+        if flowerPath and flowerPath:IsA("Model") then
+            local part = flowerPath.PrimaryPart or flowerPath:FindFirstChildWhichIsA("BasePart")
+            if part then
+                flowerPath.PrimaryPart = part
+                local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.CFrame = part.CFrame + Vector3.new(0, 5, 0)
+                end
+            end
+        end
+    end
+})
+
+-- 📦 Services
+local player = game.Players.LocalPlayer
+
+-- 📦 Tombol Teleport Langsung
+Tabs.Teleport:Button({
+    Title = "Teleport To Twisting Forest",
+    Callback = function()
+        local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.CFrame = CFrame.new(
+                11214.5547, 95.9738235, -33034.4062,
+                0.374604106, 0, -0.92718488,
+                0, 1, 0,
+                0.92718488, 0, 0.374604106
+            )
+            WindUI:Notify({
+                Title = "Teleport",
+                Content = "✅ Berhasil teleport ke lokasi rahasia!",
+                Duration = 0
+            })
+        else
+            WindUI:Notify({
+                Title = "Teleport Error",
+                Content = "❌ Tidak menemukan HumanoidRootPart!",
+                Duration = 0
+            })
+        end
+    end
+})
+
+-- 📦 Services
+local player = game.Players.LocalPlayer
+local hrp = player.Character and player.Character:WaitForChild("HumanoidRootPart")
+
+-- 🧭 Tombol Teleport
+Tabs.Teleport:Button({
+    Title = "Teleport To Enchant",
+    Callback = function()
+        if hrp then
+            hrp.CFrame = CFrame.new(
+                4148.78564, -643.118896, 2551.08569,
+                -0.292504311, -3.12199795e-08, 0.956264198,
+                6.71765488e-09, 1, 3.47026727e-08,
+                -0.956264198, 1.65745337e-08, -0.292504311
+            )
+
+            WindUI:Notify({
+                Title = "Teleport",
+                Content = "✅ Teleported ke lokasi CFrame khusus!",
+                Duration = 0
+            })
+        end
+    end
+})
+
+Tabs.Teleport:Section({ Title = "Npc" })
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local npcsFolder = workspace:WaitForChild("World"):WaitForChild("NPCs")
+
+-- Function to teleport to selected NPC
+local function teleportToNPC(npcName)
+    local character = player.Character or player.CharacterAdded:Wait()
+    local hrp = character:WaitForChild("HumanoidRootPart")
+
+    for _, npc in ipairs(npcsFolder:GetDescendants()) do
+        if npc:IsA("Model") and npc.Name:lower():match(npcName:lower()) then
+            local targetPart = npc:FindFirstChild("HumanoidRootPart") or npc.PrimaryPart
+            if targetPart then
+                hrp.CFrame = targetPart.CFrame + Vector3.new(0, 3, 0)
+            end
+            break
+        end
+    end
+end
+
+-- List of available NPCs
+local npcNames = {
+    "Sydney", "Roger Star", "Ava Carter", "Berry Dust", "Cole Blood", "Cave Worker", "Carly Enzo", "Malcom Wheels",
+    "Annie Rae", "Magnus", "Mushroom Azali", "Penguin Mechanic", "Banker", "Gary Bull", "Tribes Mate", "Discoshroom",
+    "John", "Mark Lever", "Max", "Ethan Bands", "Jane", "Blueshroom", "Brooke Kali", "Smith", "Dani Snow", "Grant Thorn",
+    "Will", "Stranded Steve", "Drawstick Liz", "Ferry Conductor", "Steve Levi", "Sam Colby", "Mushroom Researcher",
+    "Tom Baker", "Penguin Customer", "Pete R.", "Arthur Dig", "Granny Glenda", "Collin", "Cindy", "Jenn Diamond",
+    "Tribe Leader", "Mourning Family Member", "Young Guitarist", "Bu Ran", "Billy Joe", "Andy", "Soten Ran", "Mrs.Salty",
+    "Merchant Cart.Traveling Merchant", "Rocky", "Nate", "Blueshroom Merchant", "Barry", "Kira Pale", "Kei Ran", "Hale",
+    "Darren", "Jim Diamond", "Ben Bones.Ben Bones", "Andrew", "Old Blueshroom", "Jie Ran", "Silver", "O'Myers", "Erin Field",
+    "Pizza Penguin", "Lexi Star", "Ninja Deciple", "Mrs.Tiki", "Purple Imp", "Albert"
+}
+
+-- Default selected NPC
+local selectedNPC = npcNames[1]
+
+-- ✅ WindUI Dropdown (Correct)
+Tabs.Teleport:Dropdown({
+    Title = "Select NPC",
+    Desc = "Choose an NPC to teleport to",
+    Values = npcNames,
+    Default = 1,
+    Callback = function(value)
+        selectedNPC = value
+    end
+})
+
+-- ✅ WindUI Button (Correct)
+Tabs.Teleport:Button({
+    Title = "Teleport to Selected NPC",
+    Desc = "Teleports you to the chosen NPC above",
+    Callback = function()
+        teleportToNPC(selectedNPC)
+    end
+})
+
+-- 📦 Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- 🔁 Fungsi ambil RootPart
+local function getRootPart()
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    return character:WaitForChild("HumanoidRootPart")
+end
+
+-- 🏝️ ISLAND 1
+Tabs.Teleport:Section({ Title = "Island 1" })
+
+local locationCFrames1 = {
+    ["Mount Cinder"] = CFrame.new(4532.7417, 1101.18176, -1689.43616),
+    ["Rooftop Woodlands"] = CFrame.new(3888.36108, 225.724136, -360.665222),
+    ["Verdant Vale"] = CFrame.new(3778.50977, 81.9500809, 1665.49854),
+    ["Fox Town"] = CFrame.new(2018.89087, 112.049995, -358.086761),
+    ["Cinder Shores"] = CFrame.new(1572.10986, 76.1001053, -136.280136),
+    ["Fernhill Forest"] = CFrame.new(2543.40283, 81.9500885, 1276.43262),
+    ["Cinder Caverns"] = CFrame.new(2795.20557, 5.9501338, -894.694519),
+    ["Azure Hollow"] = CFrame.new(4050.29785, -670.362183, 2472.85547),
+}
+
+local locationNames1 = {}
+for name in pairs(locationCFrames1) do table.insert(locationNames1, name) end
+table.sort(locationNames1)
+local selectedLocation1 = locationNames1[1]
+
+Tabs.Teleport:Dropdown({
+    Title = "Select Location (Island 1)",
+    Values = locationNames1,
+    Default = 1,
+    Callback = function(selected) selectedLocation1 = selected end
+})
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Island 1",
+    Callback = function()
+        local cf = locationCFrames1[selectedLocation1]
+        local root = getRootPart()
+        if cf and root then root.CFrame = cf end
+    end
+})
+
+-- 🏝️ ISLAND 2
+Tabs.Teleport:Section({ Title = "Island 2" })
+
+local locationCFrames2 = {
+    ["Salty's Saloon"] = CFrame.new(-6124.78174, 117.490082, -1923.36694),
+    -- kamu bisa tambah lokasi lain di sini
+}
+
+local locationNames2 = {}
+for name in pairs(locationCFrames2) do table.insert(locationNames2, name) end
+local selectedLocation2 = locationNames2[1]
+
+Tabs.Teleport:Dropdown({
+    Title = "Select Location (Island 2)",
+    Values = locationNames2,
+    Default = 1,
+    Callback = function(selected) selectedLocation2 = selected end
+})
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Island 2",
+    Callback = function()
+        local cf = locationCFrames2[selectedLocation2]
+        local root = getRootPart()
+        if cf and root then root.CFrame = cf + Vector3.new(0, 3, 0) end
+    end
+})
+
+-- 🌙 ISLAND 3 MOON
+Tabs.Teleport:Section({ Title = "Island 3 Moon" })
+
+local locationCFrames3 = {
+    ["Lunar Dunes"] = CFrame.new(10177.3701, 10.4401979, -32023.3164),
+    ["Celestial Highlands"] = CFrame.new(8951.36328, 539.481567, -32909.3516),
+    ["The Interlude"] = CFrame.new(2748.31177, -1170.76233, 5628.08887),
+}
+
+local locationNames3 = {}
+for name in pairs(locationCFrames3) do table.insert(locationNames3, name) end
+table.sort(locationNames3)
+local selectedLocation3 = locationNames3[1]
+
+Tabs.Teleport:Dropdown({
+    Title = "Select Location (Island 3)",
+    Values = locationNames3,
+    Default = 1,
+    Callback = function(selected) selectedLocation3 = selected end
+})
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Island 3",
+    Callback = function()
+        local cf = locationCFrames3[selectedLocation3]
+        local root = getRootPart()
+        if cf and root then root.CFrame = cf end
+    end
+})
+
+-- 👤 PLAYER TELEPORT
+Tabs.Teleport:Section({ Title = "Teleport to Player" })
+
+local selectedPlayerName = nil
+local playerDropdown = nil
+
+local function getPlayerNames()
+    local names = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then table.insert(names, p.Name) end
+    end
+    return names
+end
+
+local function updateDropdown()
+    if playerDropdown then
+        playerDropdown:Refresh(getPlayerNames())
+    end
+end
+
+playerDropdown = Tabs.Teleport:Dropdown({
+    Title = "Select Player",
+    Values = getPlayerNames(),
+    ReplaceText = "Select Player",
+    Callback = function(value) selectedPlayerName = value end
+})
+
+Tabs.Teleport:Button({
+    Title = "Refresh Player List",
+    Callback = updateDropdown
+})
+
+Tabs.Teleport:Button({
+    Title = "Teleport to Player",
+    Callback = function()
+        local target = Players:FindFirstChild(selectedPlayerName)
+        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            local root = getRootPart()
+            if root then
+                root.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(2, 0, 0)
+            end
+        end
+    end
+})
+
+
+
+
+
+
+-----------------------------------------------------
+-- BAGIAN IMAGEBUTTON DI LAYAR
+-----------------------------------------------------
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.CoreGui
+
+local ImgBtn = Instance.new("ImageButton")
+ImgBtn.Parent = ScreenGui
+ImgBtn.Size = UDim2.new(0, 60, 0, 60)
+ImgBtn.Position = UDim2.new(0, 20, 1, -90)
+ImgBtn.BackgroundTransparency = 1
+ImgBtn.Image = "rbxassetid://124128525768174" -- ganti dengan gambar planet
+
+-- Biar ujung tombol bulat/halus
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 15) -- ubah radius sesuai selera
+UICorner.Parent = ImgBtn
+
+-- Toggle GUI dengan ImageButton
+local isOpen = false
+ImgBtn.MouseButton1Click:Connect(function()
+    if isOpen then
+        Window:Close()
+    else
+        Window:Open()
+    end
+    isOpen = not isOpen
+end)
+
+-----------------------------------------------------
+-- SISTEM DRAG IMAGEBUTTON
+-----------------------------------------------------
+local UserInputService = game:GetService("UserInputService")
+local dragging, dragInput, dragStart, startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    ImgBtn.Position = UDim2.new(
+        startPos.X.Scale, startPos.X.Offset + delta.X,
+        startPos.Y.Scale, startPos.Y.Offset + delta.Y
+    )
+end
+
+ImgBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = ImgBtn.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+ImgBtn.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
     end
 end)
